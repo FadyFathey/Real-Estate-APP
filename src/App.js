@@ -7,10 +7,12 @@ import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 import ForgetPassword from './pages/ForgetPassword';
 import Offers from './pages/Offers';
+import MainHeader from './components/MainHeader';
 function App() {
   return (
     < >
       <Router>
+        <MainHeader />
         <Routes>
           <Route path='/' element={<Home />} />
           <Route path='/profile' element={<Profile />} />
