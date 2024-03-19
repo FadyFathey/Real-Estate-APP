@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import Auth from '../components/Auth';
 
 
-const forgetPassword = () => {
+const ForgetPassword = () => {
     const [email, setEmail] = useState("")
 
     const onChange = (e) => {
@@ -41,4 +41,4 @@ const forgetPassword = () => {
     )
 }
 
-export default forgetPassword
+export default ForgetPassword
