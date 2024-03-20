@@ -27,6 +27,7 @@ const SignIn = () => {
         const userCredential = await signInWithEmailAndPassword(auth, email, password)
         // if user exists
         if (userCredential.user) {
+            toast.success('Sign in successful')
             navigate('/');
         }
         try {
