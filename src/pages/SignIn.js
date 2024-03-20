@@ -2,9 +2,12 @@ import React, { useState } from 'react'
 import { LuEyeOff, LuEye } from "react-icons/lu";
 import { Link } from 'react-router-dom';
 import Auth from '../components/Auth';
-
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 const SignIn = () => {
     const [showPassword, setShowPassword] = useState(false)
+    const navigate = useNavigate()
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -17,6 +20,21 @@ const SignIn = () => {
             [e.target.id]: e.target.value
         }))
     };
+
+    const onSubmit = async (e) => {
+        e.preventDefault()
+        const auth = getAuth()
+        const userCredential = await signInWithEmailAndPassword(auth, email, password)
+        // if user exists
+        if (userCredential.user) {
+            navigate('/');
+        }
+        try {
+            
+        } catch (error) {
+            toast.error('Something went wrong with the sign in')
+        }
+    }
     return (
         <section>
             <h1 className='text-3xl text-center mt-6 font-bold'>sign in</h1>
@@ -38,7 +56,7 @@ const SignIn = () => {
                                 <Link className='text-blue-500 hover:text-blue-800 transition duration-200 ease-in-out' to='/forget-password'>Forget Password?</Link>
                             </p>
                         </div>
-                        <button className=' w-full bg-blue-600 text-white px-7 py-3 text-sm font-medium uppercase rounded shadow-md hover:bg-blue-700 transition duration-150 ease-in-out hover:shadow-lg active:bg-blue-800' type='submit'>Sign In</button>
+                        <button onClick={onSubmit} className=' w-full bg-blue-600 text-white px-7 py-3 text-sm font-medium uppercase rounded shadow-md hover:bg-blue-700 transition duration-150 ease-in-out hover:shadow-lg active:bg-blue-800' type='submit'>Sign In</button>
                         <div className=' flex items-center my-4 before:border-t  before:flex-1  before:border-gray-300
                     
                     after:border-t  after:flex-1  after:border-gray-300
@@ -47,7 +65,7 @@ const SignIn = () => {
                             <p className='text-center font-semibold mx-4'>OR</p>
                         </div>
                     </form>
-                    <Auth/>
+                    <Auth />
                 </div>
             </div>
         </section>
