@@ -1,8 +1,12 @@
-import { getAuth } from 'firebase/auth'
+import { getAuth, updateProfile } from 'firebase/auth'
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'react-toastify'
+import { db } from '../firebase'
+import { doc, updateDoc } from 'firebase/firestore'
 const Profile = () => {
     const auth = getAuth()
+    const [changeDetails, setChangeDetails] = useState(false)
     const navigate = useNavigate()
     const [formData, setFormData] = useState({
         name: auth.currentUser.displayName,
@@ -10,10 +14,40 @@ const Profile = () => {
     })
     const { name, email } = formData
 
-    const onLogOut = ()=>
-    {
+    const onLogOut = () => {
         auth.signOut()
         navigate('/')
+    }
+
+    const onChange = (e) => {
+        setFormData((prevState) => ({
+            ...prevState,
+            [e.target.id]: e.target.value
+        }))
+    }
+
+    const onSubmit = async () => {
+        try {
+            // update name in firebase auth
+            if (auth.currentUser.displayName !== name) {
+                await updateProfile(auth.currentUser, {
+                    displayName: name
+                })
+            }
+            // update name in fireStore
+            const userRef = doc(db, "users", auth.currentUser.uid)
+            await updateDoc(userRef, {
+                name: name
+            })
+            toast.success('Profile updated')
+            // refresh page after 2 seconds
+            setTimeout(() => {
+                window.location.reload()
+            } , 2000)
+            
+        } catch (error) {
+            toast.error('Could not update profile')
+        }
     }
     return (
         <>
@@ -21,13 +55,13 @@ const Profile = () => {
                 <h1 className='text-3xl text-center mt-6 font-bold '>my profile</h1>
                 <div className='w-full md:w-[50%] mt-6 mx-3 '>
                     <form>
-                        <input disabled type=' text' id='name' value={name} className=' w-full px-4 py-2 text-xl text-gray-600 bg-white border border-gray-300 rounded transition-ease-in-out  ' />
+                        <input disabled={!changeDetails} onChange={onChange} type=' text' id='name' value={name} className={` w-full px-4 py-2 text-xl text-gray-600 bg-white border border-gray-300 rounded transition-ease-in-out  ${changeDetails && 'bg-red-200 focus:bg-red-200'}`} />
 
-                        <input disabled type='text' id='email' value={email} className='mb-6 w-full px-4 py-2 text-xl text-gray-600 bg-white border border-gray-300 rounded transition-ease-in-out  ' />
+                        <input disabled type='text' id='email' value={email} className={`mb-6 w-full px-4 py-2 text-xl text-gray-600 bg-white border border-gray-300 rounded transition-ease-in-out `} />
 
                         <div className='flex justify-between whitespace-nowrap text-sm sm:text-lg mb-6 '>
                             <p className='flex items-center '>Do you want to change your name?
-                                <span className='text-red-600 hover:text-red-800 transition duration-200 ease-in-out ml-1 cursor-pointer'>Edit</span>
+                                <span onClick={() => { changeDetails && onSubmit(); setChangeDetails((prevState) => !prevState) }} className='text-red-600 hover:text-red-800 transition duration-200 ease-in-out ml-1 cursor-pointer'>{changeDetails ? 'Apply change' : 'Edit'}</span>
                             </p>
                             <p onClick={onLogOut} className='text-blue-600 hover:text-blue-800 transition duration-200 ease-in-out cursor-pointer'>Sign Out</p>
                         </div>
